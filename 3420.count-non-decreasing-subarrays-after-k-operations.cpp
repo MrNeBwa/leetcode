@@ -8,48 +8,36 @@
 #include <vector>
 #define ll long long
 using std::vector;
+#include <deque>
+#include <vector>
+
 class Solution {
 public:
-    long long countNonDecreasingSubarrays(vector<int>& nums, int k) {
-        //TODO:
-        /*
-        Create matrix n, n
-        1. Calculate the value of adding each number
-        2. Sum and add if possible
-        
-        7 8 0 2
+    long long countNonDecreasingSubarrays(std::vector<int>& nums, int k) {
+        int n = nums.size();
+        long long ans = 0;
+        long long cost = 0;
+        std::deque<int> dq;
 
-        0 0 8 6 -- prefix array
-
-        7 (0 operation)
-
-        7 8 (0 operation)
-
-        7 8 0 (8 operation)
-
-        7 8 0 2 (8 + 6 operations)
-
-        0 2 (0 operation)
-
-        */
-       size_t n = nums.size();
-       std::vector<std::vector<int>> matrix (n);
-       for (size_t i = 0; i < n; ++i){
-        std::vector<int> prefix (n, 0);
-        for (auto j = i + 1; j < n; ++j){
-            int sum = nums[j-1] + prefix[j-1] - nums[j];
-            prefix[j] = (sum > 0) ? sum : 0;  
-        }
-        matrix[i] = prefix;
-       }
-        ll ans = 0;
-        for (size_t i = 0; i < n; ++i){
-            int summ = 0;
-            for (const auto& c : matrix[i]){
-                summ++;
-                if (summ <= k) ans ++;
+        int r = n - 1;
+        for (int l = n - 1; l >= 0; --l) {
+            while (!dq.empty() && nums[dq.front()] <= nums[l]) {
+                int idx = dq.front();
+                dq.pop_front();
+                int next_idx = dq.empty() ? r + 1 : dq.front();
+                cost += 1LL * (next_idx - idx) * (nums[l] - nums[idx]);
             }
+            dq.push_front(l);
+            while (cost > k) {
+                cost -= nums[dq.back()] - nums[r];
+                if (dq.back() == r) {
+                    dq.pop_back();
+                }
+                --r;
+            }
+            ans += (r - l + 1);
         }
+
         return ans;
     }
 };
